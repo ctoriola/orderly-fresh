@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Orderly - Modern Queue Management System{% endblock %}
+{% block title %}Scan QR Code - Orderly{% endblock %}
 
 {% block head %}
 <!-- Add jsQR library for QR code scanning -->
@@ -9,86 +9,47 @@
 {% endblock %}
 
 {% block content %}
-    <section class="hero-section">
-        <div class="hero-content">
-            <h1>Modern Queue Management Made Simple</h1>
-            <p class="hero-subtitle">Transform your waiting experience with digital queues, real-time updates, and QR code integration.</p>
-            <div class="hero-actions">
-                <a href="{{ url_for('scanner') }}" class="button">Get Started</a>
-                <a href="#features" class="button button-secondary">Learn More</a>
+    <div class="scanner-page">
+        <h1>Scan QR Code</h1>
+        <p class="scanner-intro">Use your device's camera to scan a queue QR code to join or check your status.</p>
+        
+        <div class="scanner-section">
+            <div class="scanner-container">
+                <video id="scanner-video" playsinline></video>
+                <canvas id="scanner-canvas" style="display: none;"></canvas>
+                <div class="scanner-overlay">
+                    <div class="scan-region"></div>
+                </div>
+            </div>
+            <button id="start-scanner" class="button">Start Scanner</button>
+            <p id="scanner-status" class="scanner-status"></p>
+            <div class="scanner-help">
+                <h3><i class="fas fa-info-circle"></i> How to Scan</h3>
+                <ol>
+                    <li>Click "Start Scanner" to activate your camera</li>
+                    <li>Point your camera at a queue QR code</li>
+                    <li>Hold steady until the code is recognized</li>
+                    <li>You'll be automatically redirected to the queue</li>
+                </ol>
             </div>
         </div>
-    </section>
 
-    <section class="status-check">
-        <h2>Already in Queue?</h2>
-        <form action="{{ url_for('check_status') }}" method="GET" class="status-form glass-form">
-            <div class="form-group">
-                <input type="text" name="queue_id" placeholder="Enter your Queue ID" required>
-            </div>
-            <button type="submit" class="button">Check Status</button>
-        </form>
-    </section>
-
-    <section id="features" class="features-section">
-        <h2>Why Choose Orderly?</h2>
-        <div class="features-grid">
-            <div class="feature-card">
-                <i class="fas fa-qrcode"></i>
-                <h3>QR Code Integration</h3>
-                <p>Seamless queue joining and status checks with QR code scanning.</p>
-            </div>
-            <div class="feature-card">
-                <i class="fas fa-mobile-alt"></i>
-                <h3>Mobile-First Design</h3>
-                <p>Perfect experience on any device, no app installation required.</p>
-            </div>
-            <div class="feature-card">
-                <i class="fas fa-chart-line"></i>
-                <h3>Real-Time Analytics</h3>
-                <p>Monitor queue performance and customer flow with live statistics.</p>
+        <div class="alternative-options">
+            <h2>Other Options</h2>
+            <div class="options-grid">
+                <a href="{{ url_for('check_status') }}" class="option-card">
+                    <i class="fas fa-search"></i>
+                    <h3>Check Queue Status</h3>
+                    <p>Already have a Queue ID? Check your position.</p>
+                </a>
+                <a href="{{ url_for('index') }}#location-list" class="option-card">
+                    <i class="fas fa-list"></i>
+                    <h3>Browse Locations</h3>
+                    <p>View and join available queues manually.</p>
+                </a>
             </div>
         </div>
-    </section>
-
-    <section class="how-it-works-section">
-        <h2>How It Works</h2>
-        <div class="steps-grid">
-            <div class="step-card">
-                <div class="step-number">1</div>
-                <h3>Create Your Queue</h3>
-                <p>Set up your location and customize queue settings in minutes.</p>
-            </div>
-            <div class="step-card">
-                <div class="step-number">2</div>
-                <h3>Share QR Codes</h3>
-                <p>Display QR codes for easy queue joining and status checks.</p>
-            </div>
-            <div class="step-card">
-                <div class="step-number">3</div>
-                <h3>Manage Flow</h3>
-                <p>Efficiently serve customers and monitor queue status in real-time.</p>
-            </div>
-        </div>
-    </section>
-
-    <section class="stats-section">
-        <h2>Platform Statistics</h2>
-        <div class="stats-container">
-            <div class="stat-card">
-                <i class="fas fa-building"></i>
-                <h2>Active Locations</h2>
-                <p class="stat-value">{{ locations|length }}</p>
-            </div>
-            <div class="stat-card">
-                <i class="fas fa-users"></i>
-                <h2>Active Queues</h2>
-                <p class="stat-value">{{ active_queues }}</p>
-            </div>
-        </div>
-    </section>
-
-    
+    </div>
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {

@@ -1,6 +1,8 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from queue_system import QueueSystem
+from models import User, users
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -16,6 +18,16 @@ app.config.from_mapping(
     DYNAMODB_TABLE=os.environ.get('DYNAMODB_TABLE', 'orderlyqueues'),
     S3_BUCKET=os.environ.get('S3_BUCKET', 'ctorderly')
 )
+
+# Initialize Flask-Login
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+login_manager.login_message_category = 'info'
+
+@login_manager.user_loader
+def load_user(user_id):
+    return users.get(user_id)
 
 # Load instance config if it exists
 if os.path.exists(os.path.join(app.instance_path, 'config.py')):
@@ -43,6 +55,11 @@ def index():
     locations = queue_system.get_all_locations()
     active_queues = sum(1 for loc in locations if any(entry.get('status') == 'waiting' for entry in loc.get('current_queue', [])))
     return render_template('index.html', locations=locations, active_queues=active_queues)
+
+@app.route('/scan')
+def scanner():
+    """Dedicated QR code scanner page"""
+    return render_template('scanner.html')
 
 @app.route('/find')
 def find_location():
@@ -140,12 +157,41 @@ def leave_queue(location_id, queue_id):
         flash('Error leaving queue', 'error')
     return redirect(url_for('index'))
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('admin_index'))
+    
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        remember = 'remember' in request.form
+        
+        user = users.get(username)
+        if user and user.check_password(password):
+            login_user(user, remember=remember)
+            next_page = request.args.get('next')
+            return redirect(next_page if next_page else url_for('admin_index'))
+        else:
+            flash('Invalid username or password', 'error')
+    
+    return render_template('login.html')
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    flash('Successfully logged out', 'success')
+    return redirect(url_for('index'))
+
 @app.route('/queue/admin')
+@login_required
 def admin_index():
     locations = queue_system.get_all_locations()
     return render_template('queue_admin.html', locations=locations)
 
 @app.route('/queue/admin/locations/create', methods=['GET', 'POST'])
+@login_required
 def admin_create_location():
     if request.method == 'POST':
         name = request.form.get('name')
