@@ -130,28 +130,33 @@ class QueueSystem:
             status_qr.make(fit=True)
             status_image = status_qr.make_image(fill_color="black", back_color="white")
             
-            # Save locally first
-            qr_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'qrcodes')
-            os.makedirs(qr_dir, exist_ok=True)
+            # Use temporary file in /tmp directory (writable in Vercel)
+            tmp_join_path = os.path.join('/tmp', f"{location_id}_join.png")
+            tmp_status_path = os.path.join('/tmp', f"{location_id}_status.png")
             
-            join_path = os.path.join(qr_dir, f"{location_id}_join.png")
-            status_path = os.path.join(qr_dir, f"{location_id}_status.png")
+            # Save to temporary location
+            join_image.save(tmp_join_path)
+            status_image.save(tmp_status_path)
             
-            join_image.save(join_path)
-            status_image.save(status_path)
-            
-            logging.info(f"Generated QR codes at {join_path} and {status_path}")
+            logging.info(f"Generated QR codes temporarily at {tmp_join_path} and {tmp_status_path}")
 
-            # Upload to S3 if available
+            # Upload to S3
             if self.s3:
                 try:
                     join_s3_key = f"qrcodes/{location_id}_join.png"
                     status_s3_key = f"qrcodes/{location_id}_status.png"
-                    self.s3.upload_file(join_path, join_s3_key)
-                    self.s3.upload_file(status_path, status_s3_key)
+                    self.s3.upload_file(tmp_join_path, join_s3_key)
+                    self.s3.upload_file(tmp_status_path, status_s3_key)
                     logging.info(f"Uploaded QR codes to S3: {join_s3_key}, {status_s3_key}")
                 except Exception as e:
                     logging.error(f"Error uploading QR codes to S3: {str(e)}")
+                finally:
+                    # Clean up temporary files
+                    try:
+                        os.remove(tmp_join_path)
+                        os.remove(tmp_status_path)
+                    except Exception as e:
+                        logging.error(f"Error cleaning up temporary files: {str(e)}")
 
             return f"qrcodes/{location_id}_join.png", f"qrcodes/{location_id}_status.png"
         except Exception as e:

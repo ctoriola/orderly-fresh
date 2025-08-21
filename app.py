@@ -168,6 +168,18 @@ def admin_create_location():
     
     return render_template('queue_admin_create.html')
 
+@app.route('/qr/<path:filename>')
+def serve_qr(filename):
+    """Serve QR codes from S3"""
+    if not queue_system.s3:
+        return "S3 storage not configured", 500
+        
+    try:
+        url = queue_system.s3.get_file_url(f"qrcodes/{filename}")
+        return redirect(url)
+    except Exception as e:
+        return str(e), 500
+
 @app.route('/queue/admin/locations/<location_id>')
 def admin_manage_location(location_id):
     location = queue_system.get_location(location_id)
@@ -177,6 +189,13 @@ def admin_manage_location(location_id):
     
     queue = queue_system.get_queue_list(location_id)
     stats = queue_system.get_queue_stats(location_id)
+    
+    # Update QR paths to use the new route
+    if location.get('join_qr_path'):
+        location['join_qr_path'] = 'qr/' + os.path.basename(location['join_qr_path'])
+    if location.get('status_qr_path'):
+        location['status_qr_path'] = 'qr/' + os.path.basename(location['status_qr_path'])
+    
     return render_template('queue_admin_location.html', 
                          location=location, 
                          queue=queue,

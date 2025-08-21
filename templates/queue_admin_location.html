@@ -10,16 +10,16 @@
     <div class="qr-codes-container">
         <div class="qr-code">
             <h2>Join Queue QR Code</h2>
-            <img src="{{ url_for('static', filename=location.join_qr_path) }}" alt="Join Queue QR Code">
+            <img src="{{ url_for('serve_qr', filename=location.join_qr_path) }}" alt="Join Queue QR Code">
             <p class="qr-help">Users can scan this QR code to join the queue</p>
-            <a href="{{ url_for('static', filename=location.join_qr_path) }}" download class="button">Download Join QR</a>
+            <a href="{{ url_for('serve_qr', filename=location.join_qr_path) }}" download class="button">Download Join QR</a>
         </div>
         {% if location.status_qr_path %}
         <div class="qr-code">
             <h2>Status Check QR Code</h2>
-            <img src="{{ url_for('static', filename=location.status_qr_path) }}" alt="Status Check QR Code">
+            <img src="{{ url_for('serve_qr', filename=location.status_qr_path) }}" alt="Status Check QR Code">
             <p class="qr-help">Users can scan this QR code to check their queue status</p>
-            <a href="{{ url_for('static', filename=location.status_qr_path) }}" download class="button">Download Status QR</a>
+            <a href="{{ url_for('serve_qr', filename=location.status_qr_path) }}" download class="button">Download Status QR</a>
         </div>
         {% endif %}
     </div>
