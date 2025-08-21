@@ -208,5 +208,6 @@ def api_queue_status(location_id, queue_id):
         return jsonify({'error': 'Queue entry not found'}), 404
     return jsonify(status)
 
+# Vercel requires the app variable to be exposed
 if __name__ == '__main__':
     app.run(debug=True)
