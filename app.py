@@ -175,6 +175,9 @@ def serve_qr(filename):
         return "S3 storage not configured", 500
         
     try:
+        # Remove any 'qrcodes/' prefix if it exists in the filename
+        if filename.startswith('qrcodes/'):
+            filename = filename[8:]  # Remove 'qrcodes/' prefix
         url = queue_system.s3.get_file_url(f"qrcodes/{filename}")
         return redirect(url)
     except Exception as e:
@@ -192,9 +195,9 @@ def admin_manage_location(location_id):
     
     # Update QR paths to use the new route
     if location.get('join_qr_path'):
-        location['join_qr_path'] = 'qr/' + os.path.basename(location['join_qr_path'])
+        location['join_qr_path'] = os.path.basename(location['join_qr_path'])
     if location.get('status_qr_path'):
-        location['status_qr_path'] = 'qr/' + os.path.basename(location['status_qr_path'])
+        location['status_qr_path'] = os.path.basename(location['status_qr_path'])
     
     return render_template('queue_admin_location.html', 
                          location=location, 

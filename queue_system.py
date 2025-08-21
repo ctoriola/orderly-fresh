@@ -158,7 +158,8 @@ class QueueSystem:
                     except Exception as e:
                         logging.error(f"Error cleaning up temporary files: {str(e)}")
 
-            return f"qrcodes/{location_id}_join.png", f"qrcodes/{location_id}_status.png"
+            # Return just the filenames without the qrcodes/ prefix
+            return f"{location_id}_join.png", f"{location_id}_status.png"
         except Exception as e:
             logging.error(f"Error generating QR codes: {str(e)}")
             return None, None
