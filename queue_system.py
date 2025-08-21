@@ -167,7 +167,7 @@ class QueueSystem:
             logging.error(f"Error generating QR code: {str(e)}")
             return None
 
-    def create_location(self, name: str, description: str = "", capacity: int = 0, base_url: str = "") -> str:
+    def create_location(self, name: str, description: str = "", capacity: int = 0, base_url: str = "", created_by: str = None) -> str:
         """Create a new location with queue"""
         try:
             location_id = str(uuid.uuid4())
@@ -179,7 +179,8 @@ class QueueSystem:
                 'current_queue': [],
                 'served_count': 0,
                 'created_at': datetime.now().isoformat(),
-                'updated_at': datetime.now().isoformat()
+                'updated_at': datetime.now().isoformat(),
+                'created_by': created_by
             }
             
             # Generate QR codes

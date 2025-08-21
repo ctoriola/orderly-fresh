@@ -1,4 +1,5 @@
 import os
+from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from queue_system import QueueSystem
@@ -184,16 +185,89 @@ def logout():
     flash('Successfully logged out', 'success')
     return redirect(url_for('index'))
 
+def requires_super_admin(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or not current_user.is_super_admin:
+            flash('You need super admin privileges to access this page', 'error')
+            return redirect(url_for('admin_index'))
+        return f(*args, **kwargs)
+    return decorated_function
+
 @app.route('/queue/admin')
 @login_required
 def admin_index():
     locations = queue_system.get_all_locations()
     return render_template('queue_admin.html', locations=locations)
 
+@app.route('/super-admin')
+@login_required
+@requires_super_admin
+def super_admin():
+    admin_list = [user for user in users.values() if not user.is_super_admin]
+    return render_template('super_admin.html', admins=admin_list)
+
+@app.route('/super-admin/create-admin', methods=['GET', 'POST'])
+@login_required
+@requires_super_admin
+def create_admin():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        location_limit = int(request.form.get('location_limit', 5))
+        
+        if not username or not password:
+            flash('Username and password are required', 'error')
+            return redirect(url_for('create_admin'))
+        
+        if username in users:
+            flash('Username already exists', 'error')
+            return redirect(url_for('create_admin'))
+        
+        new_admin = User.create(
+            username=username,
+            password=password,
+            is_super_admin=False,
+            location_limit=location_limit,
+            created_by=current_user.username
+        )
+        users[username] = new_admin
+        flash('Admin created successfully', 'success')
+        return redirect(url_for('super_admin'))
+    
+    return render_template('create_admin.html')
+
+@app.route('/super-admin/edit-admin/<admin_id>', methods=['GET', 'POST'])
+@login_required
+@requires_super_admin
+def edit_admin(admin_id):
+    admin = users.get(admin_id)
+    if not admin:
+        flash('Admin not found', 'error')
+        return redirect(url_for('super_admin'))
+    
+    if request.method == 'POST':
+        location_limit = int(request.form.get('location_limit', 5))
+        new_password = request.form.get('new_password')
+        
+        admin.location_limit = location_limit
+        if new_password:
+            admin.password_hash = generate_password_hash(new_password)
+        
+        flash('Admin updated successfully', 'success')
+        return redirect(url_for('super_admin'))
+    
+    return render_template('edit_admin.html', admin=admin)
+
 @app.route('/queue/admin/locations/create', methods=['GET', 'POST'])
 @login_required
 def admin_create_location():
     if request.method == 'POST':
+        # Check if user can create more locations
+        if not current_user.can_create_location():
+            flash('You have reached your location creation limit', 'error')
+            return redirect(url_for('admin_index'))
+            
         name = request.form.get('name')
         description = request.form.get('description', '')
         capacity = int(request.form.get('capacity', 0))
@@ -205,7 +279,16 @@ def admin_create_location():
         try:
             # Get base URL for QR code
             base_url = request.url_root.rstrip('/')
-            location_id = queue_system.create_location(name, description, capacity, base_url)
+            location_id = queue_system.create_location(name, description, capacity, base_url, created_by=current_user.username)
+            # Increment the location count for the user
+            current_user.increment_location_count()
+            
+            # Verify location count hasn't exceeded limit
+            if not current_user.is_super_admin and current_user.created_locations > current_user.location_limit:
+                # Delete the location we just created
+                queue_system.delete_location(location_id)
+                flash('You have exceeded your location creation limit', 'error')
+                return redirect(url_for('admin_index'))
             flash('Location created successfully!', 'success')
             return redirect(url_for('admin_manage_location', location_id=location_id))
         except Exception as e:

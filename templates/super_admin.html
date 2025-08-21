@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Super Admin Dashboard</h2>
+    
+    <div class="mb-4">
+        <a href="{{ url_for('create_admin') }}" class="btn btn-primary">Create New Admin</a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="card">
+        <div class="card-header">
+            <h3>Admin Users</h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Location Limit</th>
+                            <th>Created By</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for admin in admins %}
+                        <tr>
+                            <td>{{ admin.username }}</td>
+                            <td>{{ admin.location_limit }}</td>
+                            <td>{{ admin.created_by }}</td>
+                            <td>
+                                <a href="{{ url_for('edit_admin', admin_id=admin.username) }}" class="btn btn-sm btn-primary">Edit</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
