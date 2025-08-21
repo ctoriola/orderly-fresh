@@ -59,7 +59,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    backdrop-filter: blur(3px);
+    /* backdrop-filter: blur(3px); */
 }
 
 .scan-region {
@@ -435,4 +435,209 @@ button:hover, .button:hover {
     color: var(--color-accent);
     margin: 0.5rem 0;
     text-shadow: 0 0 10px var(--color-accent-glow);
+}
+
+/* Footer Styles */
+.footer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.footer-section h3 {
+    color: var(--color-text-bright);
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.footer-section p {
+    color: var(--color-text);
+    line-height: 1.6;
+}
+
+.footer-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-section ul li {
+    margin-bottom: 0.5rem;
+}
+
+.footer-section ul li a {
+    color: var(--color-text);
+    text-decoration: none;
+    transition: color var(--transition-speed);
+}
+
+.footer-section ul li a:hover {
+    color: var(--color-text-bright);
+}
+
+.social-links {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.social-links a {
+    color: var(--color-text);
+    font-size: 1.5rem;
+    transition: color var(--transition-speed);
+}
+
+.social-links a:hover {
+    color: var(--color-text-bright);
+}
+
+.footer-bottom {
+    padding-top: 2rem;
+    border-top: 1px solid var(--glass-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.footer-links {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.footer-links a {
+    color: var(--color-text);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color var(--transition-speed);
+}
+
+.footer-links a:hover {
+    color: var(--color-text-bright);
+}
+
+/* Hero Section */
+.hero-section {
+    text-align: center;
+    padding: 6rem 2rem;
+    margin-bottom: 4rem;
+    background: linear-gradient(165deg, 
+        rgba(76, 175, 80, 0.1) 0%,
+        rgba(26, 26, 26, 0.8) 100%
+    );
+    border-radius: 1rem;
+}
+
+.hero-content h1 {
+    font-size: 3.5rem;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, #fff 0%, #aaa 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1.2;
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    margin-bottom: 2.5rem;
+    color: var(--color-text);
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+/* Features Section */
+.features-section,
+.how-it-works-section {
+    padding: 4rem 0;
+}
+
+.features-grid,
+.steps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.feature-card,
+.step-card {
+    text-align: center;
+    padding: 2rem;
+    background: var(--glass-background);
+    border: 1px solid var(--glass-border);
+    border-radius: 1rem;
+    transition: transform var(--transition-speed);
+}
+
+.feature-card:hover,
+.step-card:hover {
+    transform: translateY(-5px);
+}
+
+.feature-card i {
+    font-size: 2.5rem;
+    color: var(--color-accent);
+    margin-bottom: 1.5rem;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    background: var(--color-accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    margin: 0 auto 1.5rem;
+    color: var(--color-text-bright);
+}
+
+/* Glass Form */
+.glass-form {
+    background: var(--glass-background);
+    border: 1px solid var(--glass-border);
+    border-radius: 1rem;
+    padding: 2rem;
+    backdrop-filter: blur(10px);
+    max-width: 500px;
+    margin: 2rem auto;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .hero-content h1 {
+        font-size: 2.5rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.1rem;
+    }
+    
+    .hero-actions {
+        flex-direction: column;
+    }
+    
+    .footer-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .footer-bottom {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .footer-links {
+        justify-content: center;
+    }
 }
