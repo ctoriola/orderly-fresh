@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage {{ location.name }}{% endblock %}
+
+{% block content %}
+    <h1>{{ location.name }}</h1>
+    <p>{{ location.description }}</p>
+
+    {% if location.join_qr_path %}
+    <div class="qr-codes-container">
+        <div class="qr-code">
+            <h2>Join Queue QR Code</h2>
+            <img src="{{ url_for('static', filename=location.join_qr_path) }}" alt="Join Queue QR Code">
+            <p class="qr-help">Users can scan this QR code to join the queue</p>
+            <a href="{{ url_for('static', filename=location.join_qr_path) }}" download class="button">Download Join QR</a>
+        </div>
+        {% if location.status_qr_path %}
+        <div class="qr-code">
+            <h2>Status Check QR Code</h2>
+            <img src="{{ url_for('static', filename=location.status_qr_path) }}" alt="Status Check QR Code">
+            <p class="qr-help">Users can scan this QR code to check their queue status</p>
+            <a href="{{ url_for('static', filename=location.status_qr_path) }}" download class="button">Download Status QR</a>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="stats-container">
+        <div class="stat-card">
+            <h2>Waiting</h2>
+            <p class="stat-value">{{ stats.waiting_count }}</p>
+        </div>
+        <div class="stat-card">
+            <h2>Served Today</h2>
+            <p class="stat-value">{{ stats.served_count }}</p>
+        </div>
+        <div class="stat-card">
+            <h2>Total Served</h2>
+            <p class="stat-value">{{ stats.total_served }}</p>
+        </div>
+        <div class="stat-card">
+            <h2>Est. Wait Time</h2>
+            <p class="stat-value">{{ stats.estimated_wait }} min</p>
+        </div>
+    </div>
+
+    <div class="queue-controls">
+        <form method="POST" action="{{ url_for('admin_serve_next', location_id=location.location_id) }}">
+            <button type="submit" class="button">Serve Next</button>
+        </form>
+    </div>
+
+    <h2>Current Queue</h2>
+    <div class="queue-list">
+        {% for entry in queue %}
+            <div class="queue-item">
+                <div class="queue-info">
+                    <span class="queue-number">{{ entry.position }}</span>
+                    <span class="queue-name">{{ entry.user_name }}</span>
+                    {% if entry.phone %}
+                        <span class="queue-phone">{{ entry.phone }}</span>
+                    {% endif %}
+                    {% if entry.notes %}
+                        <span class="queue-notes">{{ entry.notes }}</span>
+                    {% endif %}
+                </div>
+                <div class="queue-time">
+                    <span>Joined: {{ entry.joined_at }}</span>
+                </div>
+            </div>
+        {% else %}
+            <p>No one in queue.</p>
+        {% endfor %}
+    </div>
+{% endblock %}

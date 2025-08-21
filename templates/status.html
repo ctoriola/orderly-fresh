@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Queue Status{% endblock %}
+
+{% block content %}
+    <div class="queue-status">
+        <h1>Your Queue Status</h1>
+        
+        <div class="queue-number">
+            Position: {{ status.position }}
+        </div>
+        
+        <div class="queue-info">
+            <p>People ahead of you: {{ status.position - 1 }}</p>
+            <p>Total in queue: {{ status.total_in_queue }}</p>
+            <p>Estimated wait time: {{ status.estimated_wait }} minutes</p>
+            <p>Joined at: {{ status.joined_at }}</p>
+        </div>
+        
+        <div class="queue-actions">
+            <form method="POST" action="{{ url_for('leave_queue', location_id=location_id, queue_id=queue_id) }}">
+                <button type="submit" class="button button-danger">Leave Queue</button>
+            </form>
+        </div>
+        
+        <div class="queue-refresh">
+            <small>This page will refresh automatically every 30 seconds</small>
+        </div>
+    </div>
+
+    <script>
+        setTimeout(function() {
+            window.location.reload();
+        }, 30000);
+    </script>
+{% endblock %}

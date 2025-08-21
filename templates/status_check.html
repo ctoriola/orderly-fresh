@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Check Queue Status - {{ location.name }}{% endblock %}
+
+{% block content %}
+    <div class="status-check">
+        <h1>Check Your Queue Status</h1>
+        <h2>{{ location.name }}</h2>
+        <p>{{ location.description }}</p>
+
+        <div class="form-container">
+            <form action="{{ url_for('check_status') }}" method="GET" class="status-form">
+                <div class="form-group">
+                    <label for="queue_id">Enter Your Queue ID:</label>
+                    <input type="text" id="queue_id" name="queue_id" placeholder="Enter your Queue ID" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="button">Check Status</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="info-box">
+            <p><strong>Need help?</strong> Your Queue ID was provided when you joined the queue.</p>
+            <p>It looks like this: XXXXX-XXXXX</p>
+        </div>
+    </div>
+{% endblock %}

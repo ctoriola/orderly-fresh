@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ location.name }} - Join Queue{% endblock %}
+
+{% block content %}
+    <h1>{{ location.name }}</h1>
+    <p>{{ location.description }}</p>
+
+    <div class="stats-container">
+        <div class="stat-card">
+            <h2>People Waiting</h2>
+            <p class="stat-value">{{ stats.waiting_count }}</p>
+        </div>
+        <div class="stat-card">
+            <h2>Estimated Wait</h2>
+            <p class="stat-value">{{ stats.estimated_wait }} min</p>
+        </div>
+    </div>
+
+    <div class="form-container">
+        <form method="POST" action="{{ url_for('join_queue') }}">
+            <input type="hidden" name="location_id" value="{{ location.location_id }}">
+            
+            <div class="form-group">
+                <label for="user_name">Your Name *</label>
+                <input type="text" id="user_name" name="user_name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" name="phone">
+            </div>
+
+            <div class="form-group">
+                <label for="notes">Notes</label>
+                <textarea id="notes" name="notes" rows="3"></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="button">Join Queue</button>
+            </div>
+        </form>
+    </div>
+{% endblock %}
