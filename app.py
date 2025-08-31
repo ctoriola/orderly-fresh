@@ -346,26 +346,29 @@ def view_receipt(location_id, queue_id):
     
     receipt_path = queue_entry['receipt_path']
     
-    # Handle different receipt storage types
+    # Generate receipt URL for preview
+    receipt_url = None
+    
     if receipt_path.startswith('data:'):
         # Base64 data URL - display directly in template
-        return render_template('view_receipt.html', 
-                             queue_entry=queue_entry, 
-                             location=location,
-                             receipt_path=receipt_path)
-    if queue_system.s3 and receipt_path.startswith('receipts/'):
+        receipt_url = receipt_path
+    elif queue_system.s3 and receipt_path.startswith('receipts/'):
         try:
             receipt_url = queue_system.s3.get_file_url(receipt_path)
-            return redirect(receipt_url)
         except Exception as e:
             flash(f'Error accessing receipt: {str(e)}', 'error')
             return redirect(url_for('admin_manage_location', location_id=location_id))
+    elif receipt_path.startswith('receipts/'):
+        # For local files
+        filename = receipt_path.split('/')[-1]
+        receipt_url = url_for('serve_receipt', filename=filename)
     
-    # For local files, serve them directly
+    # Show preview template with receipt URL
     return render_template('view_receipt.html', 
                          queue_entry=queue_entry, 
                          location=location,
-                         receipt_path=receipt_path)
+                         receipt_path=receipt_path,
+                         receipt_url=receipt_url)
 
 @app.route('/receipts/<filename>')
 @login_required
