@@ -303,12 +303,24 @@ class QueueSystem:
             import os
             from werkzeug.utils import secure_filename
             
+            # Check if file is valid
+            if not receipt_file or not hasattr(receipt_file, 'filename') or not receipt_file.filename:
+                logging.warning("Invalid receipt file provided")
+                return None
+            
             # Get file extension
             filename = secure_filename(receipt_file.filename)
+            if not filename:
+                logging.warning("Invalid filename after securing")
+                return None
+                
             file_ext = os.path.splitext(filename)[1].lower()
             
             # Create a unique filename
             receipt_filename = f"receipt_{queue_id}{file_ext}"
+            
+            # Reset file pointer to beginning
+            receipt_file.seek(0)
             
             if self.s3:
                 # Upload to S3
@@ -320,6 +332,7 @@ class QueueSystem:
                 except Exception as e:
                     logging.error(f"Failed to upload receipt to S3: {str(e)}")
                     # Fall back to local storage
+                    receipt_file.seek(0)  # Reset file pointer for local save
             
             # Save locally
             receipts_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'receipts')
@@ -420,8 +433,9 @@ class QueueSystem:
             
             # Handle receipt file upload
             receipt_path = None
-            if receipt_file and receipt_file.filename:
+            if receipt_file and hasattr(receipt_file, 'filename') and receipt_file.filename and receipt_file.filename.strip():
                 receipt_path = self._save_receipt_file(receipt_file, queue_id)
+                logging.info(f"Receipt upload attempted for queue_id {queue_id}, result: {receipt_path}")
             
             queue_entry = {
                 'id': queue_id,

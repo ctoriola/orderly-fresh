@@ -131,6 +131,12 @@ def join_queue():
     notes = request.form.get('notes', '')
     receipt_file = request.files.get('receipt')
     
+    # Debug logging for receipt file
+    if receipt_file:
+        app.logger.info(f"Receipt file received: {receipt_file.filename}, content_type: {getattr(receipt_file, 'content_type', 'unknown')}")
+    else:
+        app.logger.info("No receipt file received")
+    
     if not all([location_id, user_name]):
         flash('Missing required fields', 'error')
         return redirect(url_for('queue_page', location_id=location_id))
