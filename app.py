@@ -346,8 +346,14 @@ def view_receipt(location_id, queue_id):
     
     receipt_path = queue_entry['receipt_path']
     
-    # If using S3, get the file URL
-    if queue_system.s3 and not receipt_path.startswith('receipts/'):
+    # Handle different receipt storage types
+    if receipt_path.startswith('data:'):
+        # Base64 data URL - display directly in template
+        return render_template('view_receipt.html', 
+                             queue_entry=queue_entry, 
+                             location=location,
+                             receipt_path=receipt_path)
+    if queue_system.s3 and receipt_path.startswith('receipts/'):
         try:
             receipt_url = queue_system.s3.get_file_url(receipt_path)
             return redirect(receipt_url)

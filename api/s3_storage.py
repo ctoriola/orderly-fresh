@@ -41,6 +41,18 @@ class S3Storage:
             logging.error(f"Error deleting file from S3: {str(e)}")
             raise
 
+    def upload_file_obj(self, file_obj, s3_key: str) -> bool:
+        """Upload a file object to S3"""
+        try:
+            # Reset file pointer to beginning
+            file_obj.seek(0)
+            self.s3.upload_fileobj(file_obj, self.bucket_name, s3_key)
+            logging.debug(f"Uploaded file object to s3://{self.bucket_name}/{s3_key}")
+            return True
+        except Exception as e:
+            logging.error(f"Error uploading file object to S3: {str(e)}")
+            raise
+
     def get_file_url(self, s3_key: str, expiration: int = 3600) -> str:
         """Get a presigned URL for a file"""
         try:
