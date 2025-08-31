@@ -64,8 +64,16 @@
                         <span class="queue-notes">{{ entry.notes }}</span>
                     {% endif %}
                 </div>
-                <div class="queue-time">
-                    <span>Joined: {{ entry.joined_at }}</span>
+                <div class="queue-actions">
+                    <div class="queue-time">
+                        <span>Joined: {{ entry.joined_at }}</span>
+                    </div>
+                    {% if entry.receipt_path %}
+                        <a href="{{ url_for('view_receipt', location_id=location.location_id, queue_id=entry.id) }}" 
+                           class="button button-small" target="_blank">View Receipt</a>
+                    {% else %}
+                        <span class="no-receipt">No receipt uploaded</span>
+                    {% endif %}
                 </div>
             </div>
         {% else %}

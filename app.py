@@ -129,12 +129,13 @@ def join_queue():
     user_name = request.form.get('user_name')
     phone = request.form.get('phone', '')
     notes = request.form.get('notes', '')
+    receipt_file = request.files.get('receipt')
     
     if not all([location_id, user_name]):
         flash('Missing required fields', 'error')
         return redirect(url_for('queue_page', location_id=location_id))
     
-    queue_id = queue_system.join_queue(location_id, user_name, phone, notes)
+    queue_id = queue_system.join_queue(location_id, user_name, phone, notes, receipt_file)
     if queue_id:
         flash(f'Successfully joined the queue! Your Queue ID is: {queue_id} - Keep this ID to check your status later', 'success')
         return redirect(url_for('queue_status', location_id=location_id, queue_id=queue_id))
@@ -311,6 +312,62 @@ def serve_qr(filename):
         return redirect(url)
     except Exception as e:
         return str(e), 500
+
+@app.route('/receipt/<location_id>/<queue_id>')
+@login_required
+def view_receipt(location_id, queue_id):
+    """View receipt for a queue entry"""
+    # Get the queue entry
+    location = queue_system.get_location(location_id)
+    if not location:
+        flash('Location not found', 'error')
+        return redirect(url_for('admin_index'))
+    
+    # Find the queue entry
+    queue_entry = None
+    for entry in location.get('current_queue', []):
+        if entry.get('id') == queue_id:
+            queue_entry = entry
+            break
+    
+    if not queue_entry:
+        flash('Queue entry not found', 'error')
+        return redirect(url_for('admin_manage_location', location_id=location_id))
+    
+    if not queue_entry.get('receipt_path'):
+        flash('No receipt uploaded for this entry', 'error')
+        return redirect(url_for('admin_manage_location', location_id=location_id))
+    
+    receipt_path = queue_entry['receipt_path']
+    
+    # If using S3, get the file URL
+    if queue_system.s3 and not receipt_path.startswith('receipts/'):
+        try:
+            receipt_url = queue_system.s3.get_file_url(receipt_path)
+            return redirect(receipt_url)
+        except Exception as e:
+            flash(f'Error accessing receipt: {str(e)}', 'error')
+            return redirect(url_for('admin_manage_location', location_id=location_id))
+    
+    # For local files, serve them directly
+    return render_template('view_receipt.html', 
+                         queue_entry=queue_entry, 
+                         location=location,
+                         receipt_path=receipt_path)
+
+@app.route('/receipts/<filename>')
+@login_required
+def serve_receipt(filename):
+    """Serve receipt files from local storage"""
+    import os
+    from flask import send_from_directory
+    
+    receipts_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'receipts')
+    
+    if not os.path.exists(os.path.join(receipts_dir, filename)):
+        return "Receipt not found", 404
+        
+    return send_from_directory(receipts_dir, filename)
 
 @app.route('/queue/admin/locations/<location_id>')
 def admin_manage_location(location_id):
