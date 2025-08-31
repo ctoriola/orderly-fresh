@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Receipt - {{ queue_entry.user_name }}{% endblock %}
+
+{% block content %}
+    <div class="receipt-container">
+        <h1>Receipt for {{ queue_entry.user_name }}</h1>
+        
+        <div class="receipt-info">
+            <p><strong>Queue ID:</strong> {{ queue_entry.id }}</p>
+            <p><strong>Location:</strong> {{ location.name }}</p>
+            <p><strong>Customer:</strong> {{ queue_entry.user_name }}</p>
+            {% if queue_entry.phone %}
+                <p><strong>Phone:</strong> {{ queue_entry.phone }}</p>
+            {% endif %}
+            <p><strong>Position in Queue:</strong> {{ queue_entry.position }}</p>
+            <p><strong>Joined:</strong> {{ queue_entry.joined_at }}</p>
+            {% if queue_entry.notes %}
+                <p><strong>Notes:</strong> {{ queue_entry.notes }}</p>
+            {% endif %}
+        </div>
+
+        <div class="receipt-image">
+            <h2>Uploaded Receipt</h2>
+            {% if receipt_path %}
+                {% set filename = receipt_path.split('/')[-1] %}
+                {% if receipt_path.endswith(('.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp')) %}
+                    <img src="{{ url_for('serve_receipt', filename=filename) }}" 
+                         alt="Receipt for {{ queue_entry.user_name }}" 
+                         style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 4px;">
+                {% elif receipt_path.endswith('.pdf') %}
+                    <div class="pdf-viewer">
+                        <p>PDF Receipt:</p>
+                        <a href="{{ url_for('serve_receipt', filename=filename) }}" 
+                           target="_blank" class="button">Open PDF Receipt</a>
+                    </div>
+                {% else %}
+                    <div class="file-download">
+                        <p>Receipt file:</p>
+                        <a href="{{ url_for('serve_receipt', filename=filename) }}" 
+                           target="_blank" class="button">Download Receipt</a>
+                    </div>
+                {% endif %}
+            {% else %}
+                <p>No receipt available</p>
+            {% endif %}
+        </div>
+
+        <div class="receipt-actions">
+            <a href="{{ url_for('admin_manage_location', location_id=location.location_id) }}" 
+               class="button">Back to Queue Management</a>
+        </div>
+    </div>
+
+    <style>
+        .receipt-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .receipt-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .receipt-info p {
+            margin: 10px 0;
+        }
+        
+        .receipt-image {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .receipt-image img {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .pdf-viewer, .file-download {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
+        .receipt-actions {
+            text-align: center;
+            margin-top: 30px;
+        }
+    </style>
+{% endblock %}

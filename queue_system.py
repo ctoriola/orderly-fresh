@@ -297,6 +297,43 @@ class QueueSystem:
         # Simple estimation: 5 minutes per person
         return position * 5
     
+    def _save_receipt_file(self, receipt_file, queue_id: str) -> Optional[str]:
+        """Save receipt file to S3 or local storage"""
+        try:
+            import os
+            from werkzeug.utils import secure_filename
+            
+            # Get file extension
+            filename = secure_filename(receipt_file.filename)
+            file_ext = os.path.splitext(filename)[1].lower()
+            
+            # Create a unique filename
+            receipt_filename = f"receipt_{queue_id}{file_ext}"
+            
+            if self.s3:
+                # Upload to S3
+                try:
+                    receipt_path = f"receipts/{receipt_filename}"
+                    self.s3.upload_file_obj(receipt_file, receipt_path)
+                    logging.info(f"Uploaded receipt to S3: {receipt_path}")
+                    return receipt_path
+                except Exception as e:
+                    logging.error(f"Failed to upload receipt to S3: {str(e)}")
+                    # Fall back to local storage
+            
+            # Save locally
+            receipts_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'receipts')
+            os.makedirs(receipts_dir, exist_ok=True)
+            
+            local_path = os.path.join(receipts_dir, receipt_filename)
+            receipt_file.save(local_path)
+            logging.info(f"Saved receipt locally: {local_path}")
+            return f"receipts/{receipt_filename}"
+            
+        except Exception as e:
+            logging.error(f"Error saving receipt file: {str(e)}")
+            return None
+    
     def serve_next(self, location_id: str) -> Optional[Dict]:
         """Serve the next person in queue"""
         try:
@@ -368,7 +405,7 @@ class QueueSystem:
             logging.error(f"Error deleting location {location_id}: {str(e)}")
             return False
 
-    def join_queue(self, location_id: str, user_name: str, phone: str = "", notes: str = "") -> Optional[str]:
+    def join_queue(self, location_id: str, user_name: str, phone: str = "", notes: str = "", receipt_file=None) -> Optional[str]:
         """Join a queue at a location"""
         try:
             location = self.get_location(location_id)
@@ -381,11 +418,17 @@ class QueueSystem:
             queue_id = f"{location_id[:8]}-{unique_id}"  # Format: LOCXXXXX-UNIQXXXX
             position = len([e for e in location.get('current_queue', []) if e.get('status') == 'waiting']) + 1
             
+            # Handle receipt file upload
+            receipt_path = None
+            if receipt_file and receipt_file.filename:
+                receipt_path = self._save_receipt_file(receipt_file, queue_id)
+            
             queue_entry = {
                 'id': queue_id,
                 'user_name': user_name,
                 'phone': phone,
                 'notes': notes,
+                'receipt_path': receipt_path,
                 'position': position,
                 'joined_at': datetime.now().isoformat(),
                 'status': 'waiting'  # waiting, served, left
