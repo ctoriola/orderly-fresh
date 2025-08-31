@@ -323,7 +323,7 @@ class QueueSystem:
             receipt_file.seek(0)
             
             if self.s3:
-                # Upload to S3
+                # Upload to S3 (required for serverless deployment)
                 try:
                     receipt_path = f"receipts/{receipt_filename}"
                     self.s3.upload_file_obj(receipt_file, receipt_path)
@@ -331,17 +331,20 @@ class QueueSystem:
                     return receipt_path
                 except Exception as e:
                     logging.error(f"Failed to upload receipt to S3: {str(e)}")
-                    # Fall back to local storage
-                    receipt_file.seek(0)  # Reset file pointer for local save
+                    return None
             
-            # Save locally
-            receipts_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'receipts')
-            os.makedirs(receipts_dir, exist_ok=True)
-            
-            local_path = os.path.join(receipts_dir, receipt_filename)
-            receipt_file.save(local_path)
-            logging.info(f"Saved receipt locally: {local_path}")
-            return f"receipts/{receipt_filename}"
+            # For local development only - won't work in serverless
+            try:
+                receipts_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'receipts')
+                os.makedirs(receipts_dir, exist_ok=True)
+                
+                local_path = os.path.join(receipts_dir, receipt_filename)
+                receipt_file.save(local_path)
+                logging.info(f"Saved receipt locally: {local_path}")
+                return f"receipts/{receipt_filename}"
+            except Exception as e:
+                logging.error(f"Local storage failed (expected in serverless): {str(e)}")
+                return None
             
         except Exception as e:
             logging.error(f"Error saving receipt file: {str(e)}")
