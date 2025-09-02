@@ -6,6 +6,13 @@
     <div class="queue-status">
         <h1>Your Queue Status</h1>
         
+        <div class="queue-id-display" onclick="copyQueueId('{{ queue_id }}')">
+            <span class="queue-id-label">Your Queue ID</span>
+            <span class="queue-id-value">{{ queue_id }}</span>
+            <span class="copy-hint">Click to copy</span>
+            <div class="copy-success" id="copySuccess">Copied!</div>
+        </div>
+        
         <div class="queue-number">
             Position: {{ status.position }}
         </div>
@@ -29,6 +36,31 @@
     </div>
 
     <script>
+        function copyQueueId(queueId) {
+            navigator.clipboard.writeText(queueId).then(function() {
+                const successElement = document.getElementById('copySuccess');
+                successElement.classList.add('show');
+                setTimeout(function() {
+                    successElement.classList.remove('show');
+                }, 2000);
+            }).catch(function(err) {
+                console.error('Failed to copy: ', err);
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = queueId;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                const successElement = document.getElementById('copySuccess');
+                successElement.classList.add('show');
+                setTimeout(function() {
+                    successElement.classList.remove('show');
+                }, 2000);
+            });
+        }
+
         setTimeout(function() {
             window.location.reload();
         }, 30000);
