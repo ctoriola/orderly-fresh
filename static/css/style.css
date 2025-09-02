@@ -411,17 +411,19 @@ input[type="number"],
 input[type="tel"],
 input[type="password"],
 input[type="email"],
+input[type="file"],
 textarea {
     width: 100%;
     padding: 0.75rem 1rem;
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid var(--glass-border);
     border-radius: 0.5rem;
     color: var(--color-text-bright);
     font-family: var(--font-family);
     font-size: 0.875rem;
     transition: all var(--transition-speed);
     backdrop-filter: var(--blur-sm);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 @media (min-width: 768px) {
@@ -430,6 +432,7 @@ textarea {
     input[type="tel"],
     input[type="password"],
     input[type="email"],
+    input[type="file"],
     textarea {
         padding: 1rem 1.25rem;
         border-radius: 0.75rem;
@@ -443,7 +446,104 @@ textarea:focus {
     border-color: var(--color-accent);
     box-shadow: 0 0 0 2px var(--color-accent-glow),
                 0 0 20px var(--color-accent-glow);
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(255, 255, 255, 0.12);
+}
+
+input[type="file"]:focus {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+/* File input styling */
+input[type="file"] {
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px dashed var(--glass-border);
+    border-radius: 0.75rem;
+    color: var(--color-text-bright);
+    cursor: pointer;
+    transition: all var(--transition-speed);
+}
+
+input[type="file"]:hover {
+    border-color: var(--color-accent);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+input[type="file"]:focus {
+    border-color: var(--color-accent);
+    border-style: solid;
+    box-shadow: 0 0 0 2px var(--color-accent-glow);
+}
+
+.form-help {
+    display: block;
+    margin-top: 0.5rem;
+    color: var(--color-text);
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+/* Click-to-copy queue ID styling */
+.queue-id-display {
+    background: var(--glass-background);
+    border: 2px solid var(--color-accent);
+    border-radius: 0.75rem;
+    padding: 1rem 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition-speed);
+    position: relative;
+    margin: 1rem 0;
+    user-select: none;
+}
+
+.queue-id-display:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px var(--color-accent-glow);
+}
+
+.queue-id-display .queue-id-label {
+    color: var(--color-text);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.queue-id-display .queue-id-value {
+    color: var(--color-text-bright);
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.1em;
+}
+
+.queue-id-display .copy-hint {
+    color: var(--color-text);
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+    opacity: 0.7;
+    display: block;
+}
+
+.copy-success {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--color-accent);
+    color: var(--color-background);
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.copy-success.show {
+    opacity: 1;
 }
 
 input::placeholder,

@@ -17,18 +17,18 @@
         </div>
     </div>
 
-    <div class="form-container">
+    <div class="glass-form">
         <form method="POST" action="{{ url_for('join_queue') }}" enctype="multipart/form-data">
             <input type="hidden" name="location_id" value="{{ location.location_id }}">
             
             <div class="form-group">
                 <label for="user_name">Your Name *</label>
-                <input type="text" id="user_name" name="user_name" required>
+                <input type="text" id="user_name" name="user_name" required placeholder="Enter your full name">
             </div>
 
             <div class="form-group">
                 <label for="phone">Phone Number</label>
-                <input type="tel" id="phone" name="phone">
+                <input type="tel" id="phone" name="phone" placeholder="(555) 123-4567">
             </div>
 
             <div class="form-group">
@@ -39,7 +39,7 @@
 
             <div class="form-group">
                 <label for="notes">Notes</label>
-                <textarea id="notes" name="notes" rows="3"></textarea>
+                <textarea id="notes" name="notes" rows="3" placeholder="Any special requests or notes..."></textarea>
             </div>
 
             <div class="form-actions">
